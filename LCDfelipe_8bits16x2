@@ -1,0 +1,164 @@
+/*
+ * CFile1.c
+ *
+ * Created: 04/11/2013 8:22:28 p. m.
+ *  Author: felipe
+ */ 
+
+#define puerto_salida_DDR  DDRB
+#define puerto_control_DDR DDRC
+#define puerto_salida PORTB
+#define puerto_control PORTA
+#define RS 0
+#define RW 1
+#define E 2
+
+#include <avr/io.h>
+#include <util/delay.h>
+
+void inicio()
+{
+
+DDRB=0xFF;
+DDRA=0x0F;
+_delay_ms(15);
+puerto_salida =0x30;
+puerto_control &=(~(1<<RS)|(~(1<<RW)));
+_delay_ms(4);
+puerto_salida =0x30; 
+puerto_control &=(~(1<<RS)|(~(1<<RW)));
+_delay_us(100);
+puerto_salida =0x30; 
+puerto_control &=(~(1<<RS)|(~(1<<RW)));
+//puerto_salida=0x00;
+//puerto_control=0x00;
+_delay_ms(10);
+lcd_comando(0x38);
+lcd_comando(0x0D);
+lcd_comando(0x01);
+lcd_comando(0x06);
+
+}
+void lcd_comando(unsigned char comando)
+{
+	puerto_salida=comando;
+	puerto_control &=(~(1<<RS));
+	puerto_control &=(~(1<<RW));
+	puerto_control|= (1<<E);
+	_delay_ms(5);
+	puerto_control &=(~(1<<E));
+}
+void lcd_dato(unsigned char dato)
+{
+	puerto_salida=dato;
+	puerto_control &=(~(1<<RW));
+	puerto_control |=(1<<RS);
+     puerto_control|=(1<<E);
+	_delay_ms(10);
+	puerto_control &=(~(1<<E));
+		
+}
+void clear(void)
+{
+	lcd_comando(0x01);
+	_delay_ms(10);
+	
+}
+void posicion_impresion(unsigned char x,unsigned char y)
+{
+unsigned char firstAddress[] = {0x00,0xc0};
+
+if(y==1)
+{
+	lcd_comando(firstAddress[y-1] + x-1);
+	_delay_ms(10);
+}
+if(y==2)
+{
+	lcd_comando(firstAddress[y-1] + x-1);
+	_delay_ms(10);
+}
+}
+void imprimir(char *string)
+{
+	unsigned char i ;
+	i=0;
+	
+	while(string[i]!=0)
+	{
+		lcd_dato(string[i]);
+		i++;
+	}
+	
+}
+
+//lcd.h
+
+/*
+ * IncFile1.h
+ *
+ * Created: 04/11/2013 8:21:46 p. m.
+ *  Author: felipe
+ */ 
+
+
+#ifndef LCD_H_
+#define LCD_H_
+
+
+void inicio();
+
+void lcd_comando(unsigned char);
+
+void lcd_dato(unsigned char);
+
+void imprimir(char *string);
+
+void clear(void);
+
+void posicion_impresion(unsigned char, unsigned char);
+
+
+
+#endif /* LCD_H_ */
+
+
+// general
+/*
+ * LCD_8BITS16X2.c
+ *
+ * Created: 29/10/2013 4:19:02 p. m.
+ *  Author: felipe
+ */ 
+
+
+#include <avr/io.h>
+#include "LCD.h"
+#include <avr/delay.h>
+
+int main(void)
+{
+	DDRB=0XFF;
+	DDRC=0x0F;
+
+	inicio();
+	
+	
+	
+
+    posicion_impresion(1,1);
+	imprimir("ING. ELECTRONICA");
+	posicion_impresion(1,2);
+	imprimir("  UNIQUINDIO  ");
+	
+	
+	//lcd_comando(posicion2);
+
+	
+	
+		
+    while(1)
+    {
+        //imprimir("FELIPE");
+    }
+}
